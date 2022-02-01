@@ -20,6 +20,9 @@ class PluginApi(socketio.AsyncClientNamespace):
 
     def on_register_topic(self, data):
         print("Register topic:", data)
+    
+    def on_hook_input(self, data):
+        print("Hook input:", data)
 
     def on_insert_css(self, data):
         print("Insert css:", data)
@@ -35,6 +38,9 @@ class PluginApi(socketio.AsyncClientNamespace):
 
     def on_update_bound(self, key, _type, bound):
         print("Update bound:", key, _type, bound)
+
+    def on_process_content(self, content):
+        print("Process content:", content)
 
 
 class Plugin(object):
@@ -59,6 +65,8 @@ class Plugin(object):
         self.ctx = ctx
 
     async def test_case(self):
+        # get input 'foo' from like '^g foo'
+        await sio.emit("input_hook", data=(self.ctx, "g"))
         css = ".car { position: relative; width: 100%; height: 100%; padding: 10px; background-color: rgba(250, 250, 250, 200); border: 1px solid black; text-align: center; box-sizing: border-box; overflow: auto; }"
         await sio.emit("insert_css", data=(self.ctx, css))
         await sio.emit(

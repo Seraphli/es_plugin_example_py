@@ -42,6 +42,12 @@ class PluginApi(socketio.AsyncClientNamespace):
         print("Remove elem:", data)
         self.elem_count -= 1
 
+    def on_show_view(self, data):
+        print("Show view:", data)
+
+    def on_hide_view(self, data):
+        print("Hide view:", data)
+
     def on_exec_js_in_elem(self, data):
         print("Exec js in elem:", data)
 
@@ -80,31 +86,48 @@ class Plugin(object):
         await sio.emit("input_hook", data=(self.ctx, "g"))
         css = ".car { position: relative; width: 100%; height: 100%; padding: 10px; background-color: rgba(250, 250, 250, 200); border: 1px solid black; text-align: center; box-sizing: border-box; overflow: auto; }"
         await sio.emit("insert_css", data=(self.ctx, css))
+        basic_elem = {
+            "key": "basic-1",
+            "type": 0,
+            "bound": {"x": 200, "y": 200, "w": 100, "h": 50},
+            "content": "<div class='car'>Hello</div>",
+        }
+        view_elem = {
+            "key": "view-1",
+            "type": 1,
+            "bound": {"x": 300, "y": 300, "w": 300, "h": 300},
+            "content": "https://www.baidu.com",
+        }
         await sio.emit(
             "update_elem",
             data=(
                 self.ctx,
-                {
-                    "key": "basic-1",
-                    "type": 0,
-                    "bound": {"x": 200, "y": 200, "w": 100, "h": 50},
-                    "content": "<div class='car'>Hello</div>",
-                },
+                basic_elem,
             ),
         )
         await sio.emit(
             "update_elem",
             data=(
                 self.ctx,
-                {
-                    "key": "view-1",
-                    "type": 1,
-                    "bound": {"x": 300, "y": 300, "w": 300, "h": 300},
-                    "content": "https://www.baidu.com",
-                },
+                view_elem,
             ),
         )
         await sio.start_background_task(self.wait_for_elem)
+        await sio.emit(
+            "hide_view",
+            data=(
+                self.ctx,
+                view_elem,
+            ),
+        )
+        await sio.sleep(1)
+        await sio.emit(
+            "show_view",
+            data=(
+                self.ctx,
+                view_elem,
+            ),
+        )
         await sio.emit(
             "exec_js_in_elem",
             data=(

@@ -57,6 +57,9 @@ class PluginApi(socketio.AsyncClientNamespace):
     def on_process_content(self, content):
         print("Process content:", content)
 
+    def on_mode_flag(self, lock_flag, move_flag, dev_flag):
+        print("Mode flag:", lock_flag, move_flag, dev_flag)
+
 
 class Plugin(object):
     def __init__(self) -> None:

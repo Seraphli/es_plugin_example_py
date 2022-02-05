@@ -6,6 +6,7 @@ import socketio
 import uuid
 
 APP_NAME = "electron-spirit"
+PLUGIN_NAME = "ES Plugin Example"
 
 
 class PluginApi(socketio.AsyncClientNamespace):
@@ -51,6 +52,9 @@ class PluginApi(socketio.AsyncClientNamespace):
     def on_exec_js_in_elem(self, data):
         print("Exec js in elem:", data)
 
+    def on_notify(self, data):
+        print("Notify:", data)
+
     def on_update_bound(self, key, _type, bound):
         print("Update bound:", key, _type, bound)
 
@@ -79,6 +83,9 @@ class Plugin(object):
         ctx = {"topic": "foo", "pwd": str(uuid.uuid4())}
         await sio.emit("register_topic", ctx)
         self.ctx = ctx
+        await sio.emit(
+            "notify", data=(self.ctx, "Plugin Connected", PLUGIN_NAME, "success", 1500)
+        )
 
     async def wait_for_elem(self):
         while self.api.elem_count < 2:
@@ -144,6 +151,12 @@ class Plugin(object):
                 "1 + 2",
             ),
         )
+        await sio.emit(
+            "notify",
+            data=(self.ctx, "Demo complete. Use `ctrl + c` to exit.", PLUGIN_NAME),
+        )
+        await sio.sleep(5)
+        print("Demo complete. Use `ctrl + c` to exit.")
 
     async def loop(self):
         await sio.connect(f"http://localhost:{self.port}")

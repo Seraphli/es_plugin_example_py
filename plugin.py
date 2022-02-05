@@ -77,8 +77,8 @@ class Plugin(object):
     def load_config(self):
         path = user_data_dir(APP_NAME, False, roaming=True)
         with codecs.open(path + "/api.json") as f:
-            self.config = json.load(f)
-        self.port = self.config["apiPort"]
+            config = json.load(f)
+        self.port = config["apiPort"]
         try:
             with codecs.open(PLUGIN_SETTING) as f:
                 self.cfg = json.load(f)

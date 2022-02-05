@@ -111,9 +111,6 @@ class Plugin(object):
         ctx = {"topic": SHORT_NAME, "pwd": str(uuid.uuid4())}
         await sio.emit("register_topic", ctx)
         self.ctx = ctx
-        await sio.emit(
-            "notify", data=(self.ctx, "Plugin Connected", PLUGIN_NAME, "success", 1500)
-        )
 
     async def wait_for_elem(self):
         while self.api.elem_count < 2:

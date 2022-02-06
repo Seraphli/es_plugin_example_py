@@ -25,7 +25,8 @@ export type PluginContext = {
 export interface ClientToServerEvents {
   echo: (msg: string) => void;
   register_topic: (ctx: PluginContext) => void;
-  input_hook: (ctx: PluginContext, contentRegex: string) => void;
+  add_input_hook: (ctx: PluginContext, contentRegex: string) => void;
+  del_input_hook: (ctx: PluginContext, contentRegex: string) => void;
   insert_css: (ctx: PluginContext, css: string) => void;
   remove_css: (ctx: PluginContext, key: string) => void;
   update_elem: (ctx: PluginContext, elem: PluginApiElement) => void;
@@ -49,7 +50,8 @@ export interface ClientToServerEvents {
 export interface ServerToClientEvents {
   echo: (resp: PluginApiResponse) => void;
   register_topic: (resp: PluginApiResponse) => void;
-  input_hook: (resp: PluginApiResponse) => void;
+  add_input_hook: (resp: PluginApiResponse) => void;
+  del_input_hook: (resp: PluginApiResponse) => void;
   insert_css: (resp: PluginApiResponse) => void;
   remove_css: (resp: PluginApiResponse) => void;
   update_elem: (resp: PluginApiResponse) => void;

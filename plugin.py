@@ -29,8 +29,11 @@ class PluginApi(socketio.AsyncClientNamespace):
     def on_register_topic(self, data):
         print("Register topic:", data)
 
-    def on_hook_input(self, data):
-        print("Hook input:", data)
+    def on_add_input_hook(self, data):
+        print("Add input hook:", data)
+
+    def on_del_input_hook(self, data):
+        print("Del input hook:", data)
 
     def on_insert_css(self, data):
         print("Insert css:", data)
@@ -118,7 +121,7 @@ class Plugin(object):
 
     async def test_case(self):
         # get input 'foo' from like '^g foo'
-        await sio.emit("input_hook", data=(self.ctx, self.cfg["input_hook"]))
+        await sio.emit("add_input_hook", data=(self.ctx, self.cfg["input_hook"]))
         css = self.cfg["css"]
         await sio.emit("insert_css", data=(self.ctx, css))
         basic_elem = {
@@ -176,11 +179,13 @@ class Plugin(object):
                 "1 + 2",
             ),
         )
+        await sio.sleep(5)
+        await sio.emit("del_input_hook", data=(self.ctx, self.cfg["input_hook"]))
         await sio.emit(
             "notify",
             data=(self.ctx, "Demo complete. Use `ctrl + c` to exit.", PLUGIN_NAME),
         )
-        await sio.sleep(5)
+        await sio.sleep(1)
         print("Demo complete. Use `ctrl + c` to exit.")
 
     async def loop(self):

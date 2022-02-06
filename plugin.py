@@ -99,7 +99,7 @@ class Plugin(object):
     def save_cfg(self):
         with codecs.open(PLUGIN_SETTING, "w") as f:
             json.dump(self.cfg, f)
-    
+
     def update_bound(self, key, _type, bound):
         if key == "basic-1":
             self.cfg["basic_bound"] = bound
@@ -183,7 +183,13 @@ class Plugin(object):
         await sio.emit("del_input_hook", data=(self.ctx, self.cfg["input_hook"]))
         await sio.emit(
             "notify",
-            data=(self.ctx, "Demo complete. Use `ctrl + c` to exit.", PLUGIN_NAME),
+            data=(
+                self.ctx,
+                {
+                    "text": "Demo complete. Use `ctrl + c` to exit.",
+                    "title": PLUGIN_NAME,
+                },
+            ),
         )
         await sio.sleep(1)
         print("Demo complete. Use `ctrl + c` to exit.")

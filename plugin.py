@@ -120,7 +120,7 @@ class Plugin(object):
             await asyncio.sleep(0.1)
 
     async def test_case(self):
-        # get input 'foo' from like '^g foo'
+        # get input 'foo' from like '!g foo'
         await sio.emit("add_input_hook", data=(self.ctx, self.cfg["input_hook"]))
         css = self.cfg["css"]
         await sio.emit("insert_css", data=(self.ctx, css))

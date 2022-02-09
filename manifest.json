@@ -1,1 +1,10 @@
-{"name":"","version":"","description":"","init_default":["PYTHON -m pip install -r requirements.txt","PYTHON plugin.py"]}
+{
+  "name": "",
+  "version": "",
+  "description": "",
+  "enabled": false,
+  "init_default": [
+    "PYTHON -m pip install -r requirements.txt",
+    "PYTHON plugin.py"
+  ]
+}

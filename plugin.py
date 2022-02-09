@@ -9,6 +9,14 @@ APP_NAME = "electron-spirit"
 PLUGIN_NAME = "ES Plugin Example"
 SHORT_NAME = "example"
 PLUGIN_SETTING = "plugin.setting.json"
+DEFAULT_CONFIG = {
+    "input_hook": "g",
+    "css": ".car { position: relative; width: 100%; height: 100%; padding: 10px; background-color: rgba(250, 250, 250, 200); border: 1px solid black; text-align: center; box-sizing: border-box; overflow: auto; }",
+    "basic": "<div class='car'>Hello</div>",
+    "basic_bound": {"x": 200, "y": 200, "w": 100, "h": 50},
+    "view": "https://www.baidu.com",
+    "view_bound": {"x": 300, "y": 300, "w": 300, "h": 300},
+}
 
 
 class PluginApi(socketio.AsyncClientNamespace):
@@ -85,15 +93,11 @@ class Plugin(object):
         try:
             with codecs.open(PLUGIN_SETTING) as f:
                 self.cfg = json.load(f)
+            for k in DEFAULT_CONFIG:
+                if k not in self.cfg or type(self.cfg[k]) != type(DEFAULT_CONFIG[k]):
+                    self.cfg[k] = DEFAULT_CONFIG[k]
         except:
-            self.cfg = {
-                "input_hook": "g",
-                "css": ".car { position: relative; width: 100%; height: 100%; padding: 10px; background-color: rgba(250, 250, 250, 200); border: 1px solid black; text-align: center; box-sizing: border-box; overflow: auto; }",
-                "basic": "<div class='car'>Hello</div>",
-                "basic_bound": {"x": 200, "y": 200, "w": 100, "h": 50},
-                "view": "https://www.baidu.com",
-                "view_bound": {"x": 300, "y": 300, "w": 300, "h": 300},
-            }
+            self.cfg = DEFAULT_CONFIG
         self.save_cfg()
 
     def save_cfg(self):

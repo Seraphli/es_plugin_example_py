@@ -72,5 +72,7 @@ export interface ServerToClientEvents {
     move_flag: boolean,
     dev_flag: boolean,
   ) => void;
+  elem_activated: (key: string) => void;
+  elem_deactivated: (key: string) => void;
 }
 ```

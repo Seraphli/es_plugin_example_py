@@ -74,5 +74,7 @@ export interface ServerToClientEvents {
   ) => void;
   elem_activated: (key: string) => void;
   elem_deactivated: (key: string) => void;
+  elem_remove: (key: string, callback: (cancel: boolean) => void) => void;
+  elem_refresh: (key: string, callback: (cancel: boolean) => void) => void;
 }
 ```

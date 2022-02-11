@@ -87,11 +87,11 @@ class PluginApi(socketio.AsyncClientNamespace):
     def on_elem_deactivated(self, key):
         print("Elem deactivated:", key)
 
-    async def on_elem_remove(self, key):
+    def on_elem_remove(self, key):
         print("Elem remove:", key)
         return False
 
-    async def on_elem_refresh(self, key):
+    def on_elem_refresh(self, key):
         print("Elem refresh:", key)
         return False
 

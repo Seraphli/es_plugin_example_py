@@ -81,6 +81,12 @@ class PluginApi(socketio.AsyncClientNamespace):
     def on_mode_flag(self, lock_flag, move_flag, dev_flag):
         print("Mode flag:", lock_flag, move_flag, dev_flag)
 
+    def on_elem_activated(self, key):
+        print("Elem activated:", key)
+
+    def on_elem_deactivated(self, key):
+        print("Elem deactivated:", key)
+
 
 class Plugin(object):
     def __init__(self) -> None:

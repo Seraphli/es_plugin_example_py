@@ -49,7 +49,7 @@ class PluginApi(socketio.AsyncClientNamespace):
         print("Remove css:", data)
 
     def on_addElem(self, data):
-        print("Update elem:", data)
+        print("Add elem:", data)
         self.elem_count += 1
 
     def on_delElem(self, data):
@@ -123,7 +123,7 @@ class Plugin(object):
         with codecs.open(PLUGIN_SETTING, "w") as f:
             json.dump(self.cfg, f)
 
-    def update_bound(self, key, _type, bound):
+    def update_bound(self, key, bound):
         if key == "ex-1":
             self.cfg["basic_bound"] = bound
         elif key == "ex-2":
@@ -191,6 +191,7 @@ class Plugin(object):
         )
         await sio.sleep(5)
         await sio.emit("delInputHook", data=(self.cfg["input_hook"]))
+        await sio.emit("setOpacity", data=(catKey, 0.5))
         await sio.emit(
             "notify",
             data=(

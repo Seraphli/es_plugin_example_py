@@ -12,7 +12,7 @@ SHORT_NAME = "example"
 PLUGIN_SETTING = "plugin.setting.json"
 DEFAULT_CONFIG = {
     "input_hook": "g",
-    "css": ".car { position: relative; width: 100%; height: 100%; padding: 10px; background-color: rgba(250, 250, 250, 200); border: 1px solid black; text-align: center; box-sizing: border-box; overflow: auto; }",
+    "css": ".car { position: relative; width: 100%; height: 100%; padding: 10px; background-color: rgba(250, 250, 250, 1); border: 1px solid black; text-align: center; box-sizing: border-box; overflow: auto; }",
     "basic": "<div class='car'>Hello</div>",
     "basic_bound": {"x": 200, "y": 200, "w": 100, "h": 50},
     "view": "https://www.baidu.com",
@@ -36,62 +36,65 @@ class PluginApi(socketio.AsyncClientNamespace):
     def on_echo(self, data):
         print("Echo:", data)
 
-    def on_register_topic(self, data):
-        print("Register topic:", data)
-
-    def on_add_input_hook(self, data):
+    def on_addInputHook(self, data):
         print("Add input hook:", data)
 
-    def on_del_input_hook(self, data):
+    def on_delInputHook(self, data):
         print("Del input hook:", data)
 
-    def on_insert_css(self, data):
+    def on_insertCSS(self, data):
         print("Insert css:", data)
 
-    def on_remove_css(self, data):
+    def on_removeCSS(self, data):
         print("Remove css:", data)
 
-    def on_update_elem(self, data):
+    def on_addElem(self, data):
         print("Update elem:", data)
         self.elem_count += 1
 
-    def on_remove_elem(self, data):
+    def on_delElem(self, data):
         print("Remove elem:", data)
         self.elem_count -= 1
 
-    def on_show_view(self, data):
+    def on_showElem(self, data):
         print("Show view:", data)
 
-    def on_hide_view(self, data):
+    def on_hideElem(self, data):
         print("Hide view:", data)
 
-    def on_exec_js_in_elem(self, data):
+    def on_setBound(self, data):
+        print("Set bound:", data)
+
+    def on_setContent(self, data):
+        print("Set content:", data)
+
+    def on_setOpacity(self, data):
+        print("Set opacity:", data)
+
+    def on_execJSInElem(self, data):
         print("Exec js in elem:", data)
 
     def on_notify(self, data):
         print("Notify:", data)
 
-    def on_update_bound(self, key, _type, bound):
-        print("Update bound:", key, _type, bound)
-        self.parent.update_bound(key, _type, bound)
+    def on_updateBound(self, key, bound):
+        print("Update bound:", key, bound)
+        self.parent.update_bound(key, bound)
 
-    def on_process_content(self, content):
+    def on_updateOpacity(self, key, opacity):
+        print("Update opacity:", key, opacity)
+
+    def on_processContent(self, content):
         print("Process content:", content)
 
-    def on_mode_flag(self, lock_flag, move_flag, dev_flag):
-        print("Mode flag:", lock_flag, move_flag, dev_flag)
+    def on_modeFlag(self, flags):
+        print("Mode flag:", flags)
 
-    def on_elem_activated(self, key):
-        print("Elem activated:", key)
-
-    def on_elem_deactivated(self, key):
-        print("Elem deactivated:", key)
-
-    def on_elem_remove(self, key):
+    def on_elemRemove(self, key):
         print("Elem remove:", key)
         return False
 
-    def on_elem_refresh(self, key):
+    def on_elemRefresh(self, key):
         print("Elem refresh:", key)
         return False
 
@@ -121,19 +124,11 @@ class Plugin(object):
             json.dump(self.cfg, f)
 
     def update_bound(self, key, _type, bound):
-        if key == "basic-1":
+        if key == "ex-1":
             self.cfg["basic_bound"] = bound
-        elif key == "view-1":
+        elif key == "ex-2":
             self.cfg["view_bound"] = bound
         self.save_cfg()
-
-    async def register(self):
-        # Create a context for registering plugins
-        # You can either use sample password or use complex password
-        # You can also register multiple topic
-        ctx = {"topic": SHORT_NAME, "pwd": str(uuid.uuid4())}
-        await sio.emit("register_topic", ctx)
-        self.ctx = ctx
 
     async def wait_for_elem(self):
         while self.api.elem_count < 2:
@@ -141,70 +136,64 @@ class Plugin(object):
 
     async def test_case(self):
         # get input 'foo' from like '!g foo'
-        await sio.emit("add_input_hook", data=(self.ctx, self.cfg["input_hook"]))
-        css = self.cfg["css"]
-        await sio.emit("insert_css", data=(self.ctx, css))
+        await sio.emit("addInputHook", data=(self.cfg["input_hook"]))
+        catKey = "ex-1"
         basic_elem = {
-            "key": "basic-1",
             "type": 0,
             "bound": self.cfg["basic_bound"],
             "content": self.cfg["basic"],
         }
+        await sio.emit(
+            "addElem",
+            data=(
+                catKey,
+                basic_elem,
+            ),
+        )
+        css = self.cfg["css"]
+        await sio.emit("insertCSS", data=(catKey, css))
+        catKey = "ex-2"
         view_elem = {
-            "key": "view-1",
             "type": 1,
             "bound": self.cfg["view_bound"],
             "content": self.cfg["view"],
         }
         await sio.emit(
-            "update_elem",
+            "addElem",
             data=(
-                self.ctx,
-                basic_elem,
-            ),
-        )
-        await sio.emit(
-            "update_elem",
-            data=(
-                self.ctx,
+                catKey,
                 view_elem,
             ),
         )
         await sio.start_background_task(self.wait_for_elem)
+        await sio.sleep(2)
         await sio.emit(
-            "hide_view",
+            "hideElem",
             data=(
-                self.ctx,
+                catKey,
                 view_elem,
             ),
         )
         await sio.sleep(1)
         await sio.emit(
-            "show_view",
+            "showElem",
             data=(
-                self.ctx,
+                catKey,
                 view_elem,
             ),
         )
         await sio.emit(
-            "exec_js_in_elem",
+            "execJSInElem",
             data=(
-                self.ctx,
-                {
-                    "key": "view-1",
-                    "type": 1,
-                    "bound": {"x": -1, "y": -1, "w": -1, "h": -1},
-                    "content": "https://www.baidu.com",
-                },
+                catKey,
                 "1 + 2",
             ),
         )
         await sio.sleep(5)
-        await sio.emit("del_input_hook", data=(self.ctx, self.cfg["input_hook"]))
+        await sio.emit("delInputHook", data=(self.cfg["input_hook"]))
         await sio.emit(
             "notify",
             data=(
-                self.ctx,
                 {
                     "text": "Demo complete. Use `ctrl + c` to exit.",
                     "title": PLUGIN_NAME,
@@ -216,8 +205,7 @@ class Plugin(object):
 
     async def loop(self):
         await sio.connect(f"http://localhost:{self.port}")
-        await sio.emit("echo", "Hello World!")
-        await self.register()
+        await sio.emit("echo", ("Hello World!"))
         await self.test_case()
         await sio.wait()
 

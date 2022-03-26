@@ -13,9 +13,11 @@ PLUGIN_SETTING = "plugin.setting.json"
 DEFAULT_CONFIG = {
     "input_hook": "g",
     "css": ".car { position: relative; width: 100%; height: 100%; padding: 10px; background-color: rgba(250, 250, 250, 1); border: 1px solid black; text-align: center; box-sizing: border-box; overflow: auto; }",
-    "basic": "<div class='car'>Hello</div>",
+    "basic-1": "<div class='car'>Hello</div>",
+    "basic-2": "<div class='car'>World</div>",
     "basic_bound": {"x": 200, "y": 200, "w": 100, "h": 50},
-    "view": "https://www.baidu.com",
+    "view-1": "https://www.baidu.com",
+    "view-2": "https://www.w3.org/",
     "view_bound": {"x": 300, "y": 300, "w": 300, "h": 300},
 }
 
@@ -92,11 +94,13 @@ class PluginApi(socketio.AsyncClientNamespace):
 
     def on_elemRemove(self, key):
         print("Elem remove:", key)
-        return False
+        # prevent remove elem
+        return True
 
     def on_elemRefresh(self, key):
         print("Elem refresh:", key)
-        return False
+        # prevent refresh elem
+        return True
 
 
 class Plugin(object):
@@ -141,7 +145,7 @@ class Plugin(object):
         basic_elem = {
             "type": 0,
             "bound": self.cfg["basic_bound"],
-            "content": self.cfg["basic"],
+            "content": self.cfg["basic-1"],
         }
         await sio.emit(
             "addElem",
@@ -156,7 +160,7 @@ class Plugin(object):
         view_elem = {
             "type": 1,
             "bound": self.cfg["view_bound"],
-            "content": self.cfg["view"],
+            "content": self.cfg["view-1"],
         }
         await sio.emit(
             "addElem",
@@ -189,8 +193,35 @@ class Plugin(object):
                 "1 + 2",
             ),
         )
+        catKey = "ex-1"
+        basic_elem = {
+            "type": 0,
+            "bound": self.cfg["basic_bound"],
+            "content": self.cfg["basic-2"],
+        }
+        await sio.emit(
+            "addElem",
+            data=(
+                catKey,
+                basic_elem,
+            ),
+        )
+        catKey = "ex-2"
+        view_elem = {
+            "type": 1,
+            "bound": self.cfg["view_bound"],
+            "content": self.cfg["view-2"],
+        }
+        await sio.emit(
+            "addElem",
+            data=(
+                catKey,
+                view_elem,
+            ),
+        )
         await sio.sleep(5)
         await sio.emit("delInputHook", data=(self.cfg["input_hook"]))
+        catKey = "ex-2"
         await sio.emit("setOpacity", data=(catKey, 0.5))
         await sio.emit(
             "notify",

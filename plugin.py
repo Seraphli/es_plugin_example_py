@@ -28,12 +28,12 @@ class PluginApi(socketio.AsyncClientNamespace):
         self.elem_count = 0
         self.parent = parent
 
-    def on_connect(self):
+    async def on_connect(self):
         print("Connected")
+        await self.parent.setup_connect()
 
     def on_disconnect(self):
         print("Disconnected")
-        sys.exit(0)
 
     def on_echo(self, data):
         print("Echo:", data)
@@ -138,7 +138,8 @@ class Plugin(object):
         while self.api.elem_count < 2:
             await asyncio.sleep(0.1)
 
-    async def test_case(self):
+    async def setup_connect(self):
+        await sio.emit("echo", ("Hello World!"))
         # get input 'foo' from like '!g foo'
         await sio.emit("addInputHook", data=(self.cfg["input_hook"]))
         catKey = "ex-1"
@@ -237,8 +238,6 @@ class Plugin(object):
 
     async def loop(self):
         await sio.connect(f"http://localhost:{self.port}")
-        await sio.emit("echo", ("Hello World!"))
-        await self.test_case()
         await sio.wait()
 
 

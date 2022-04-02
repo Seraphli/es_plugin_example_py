@@ -22,18 +22,36 @@ DEFAULT_CONFIG = {
 }
 
 
+o_print = print
+
+
+def print_flush(*args, **kwargs):
+    o_print(*args, **kwargs)
+    sys.stdout.flush()
+
+
+print = print_flush
+
+
 class PluginApi(socketio.AsyncClientNamespace):
     def __init__(self, parent):
         super().__init__()
         self.elem_count = 0
         self.parent = parent
+        self.connected = False
 
     async def on_connect(self):
         print("Connected")
+        if self.connected:
+            print("Disconnect because already connected")
+            asyncio.get_running_loop().stop()
+            return
         await self.parent.setup_connect()
+        self.connected = True
 
     def on_disconnect(self):
         print("Disconnected")
+        asyncio.get_running_loop().stop()
 
     def on_echo(self, data):
         print("Echo:", data)
@@ -237,13 +255,27 @@ class Plugin(object):
         print("Demo complete. Use `ctrl + c` to exit.")
 
     async def loop(self):
+        print("Run loop")
         await sio.connect(f"http://localhost:{self.port}")
+        print("Sio Connected")
         await sio.wait()
+        print("Loop end")
 
 
 if __name__ == "__main__":
-    # asyncio
-    sio = socketio.AsyncClient()
-    p = Plugin()
-    sio.register_namespace(p.api)
-    asyncio.run(p.loop())
+    while True:
+        try:
+            # asyncio
+            sio = socketio.AsyncClient()
+            p = Plugin()
+            sio.register_namespace(p.api)
+            asyncio.run(p.loop())
+        except RuntimeError:
+            import traceback
+
+            print(traceback.format_exc())
+        except:
+            import traceback
+
+            print(traceback.format_exc())
+            break
